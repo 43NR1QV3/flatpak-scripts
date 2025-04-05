@@ -5,7 +5,7 @@
 SOURCE_DIR="${HOME}/.local/share/flatpak/overrides"
 
 # Destination directory in the repository root
-DEST_DIR="$(git rev-parse --show-toplevel)/flatpak-overrides"
+DEST_DIR="$(git rev-parse --show-toplevel)/overrides"
 
 # Create destination directory if it doesn't exist
 mkdir -p "$DEST_DIR"
@@ -24,23 +24,45 @@ if git status --porcelain "$DEST_DIR" | grep -q .; then
     git commit -m "Automatic update of Flatpak overrides"
 
     echo "Flatpak override changes have been added in a new commit."
-
-    # No need to explicitly push, as the original push will continue after the hook
 fi
 
-# Part 2: Create Flatpak reinstall script
-# Output file name
-OUTPUT_FILE="reinstall-flatpaks.sh"
+# Part 2: Create and update app list and reinstall script
 REPO_ROOT=$(git rev-parse --show-toplevel)
-OUTPUT_PATH="$REPO_ROOT/$OUTPUT_FILE"
+APP_LIST_FILE="$REPO_ROOT/installed-flatpaks.txt"
+REINSTALL_SCRIPT="$REPO_ROOT/reinstall-apps.sh"
 
-# Save current installed apps to compare later for changes
-if [ -f "$OUTPUT_PATH" ]; then
-    OLD_CONTENT=$(cat "$OUTPUT_PATH")
+# Get current list of installed Flatpak applications
+echo "Checking installed Flatpak applications..."
+CURRENT_APPS=$(flatpak list --app --columns=application | sort)
+CURRENT_APP_COUNT=$(echo "$CURRENT_APPS" | wc -l)
+
+# Check if app list file exists and compare
+UPDATE_NEEDED=false
+if [ ! -f "$APP_LIST_FILE" ]; then
+    # File doesn't exist, create it
+    echo "Creating initial Flatpak applications list..."
+    echo "$CURRENT_APPS" > "$APP_LIST_FILE"
+    UPDATE_NEEDED=true
+else
+    # File exists, check if content has changed
+    STORED_APPS=$(cat "$APP_LIST_FILE")
+    STORED_APP_COUNT=$(echo "$STORED_APPS" | wc -l)
+
+    if [ "$CURRENT_APP_COUNT" != "$STORED_APP_COUNT" ] || [ "$(echo "$CURRENT_APPS")" != "$(echo "$STORED_APPS")" ]; then
+        echo "Changes detected in installed Flatpak applications..."
+        echo "$CURRENT_APPS" > "$APP_LIST_FILE"
+        UPDATE_NEEDED=true
+    else
+        echo "No changes in installed Flatpak applications."
+    fi
 fi
 
-# Create script file with header
-cat > "$OUTPUT_PATH" << 'EOF'
+# Create or update reinstall script if needed
+if [ "$UPDATE_NEEDED" = true ]; then
+    echo "Updating Flatpak reinstallation script..."
+
+    # Create script file with header
+    cat > "$REINSTALL_SCRIPT" << 'EOF'
 #!/bin/bash
 
 # Script to reinstall all Flatpak applications
@@ -50,18 +72,19 @@ echo "Starting Flatpak applications reinstallation..."
 
 EOF
 
-# Add execute permission to the script
-chmod +x "$OUTPUT_PATH"
+    # Add execute permission to the script
+    chmod +x "$REINSTALL_SCRIPT"
 
-# Get list of installed Flatpak applications
-echo "Generating list of installed Flatpak applications..."
-flatpak_apps=$(flatpak list --app --columns=application)
+    # For each application, add installation command with verification
+    while IFS= read -r app; do
+        # Skip empty lines
+        if [ -z "$app" ]; then
+            continue
+        fi
 
-# For each application, add installation command with verification
-for app in $flatpak_apps; do
-  # Add command to output script with check if already installed
-  echo "Adding $app to the script..."
-  cat >> "$OUTPUT_PATH" << EOF
+        # Add command to output script with check if already installed
+        echo "Adding $app to the script..."
+        cat >> "$REINSTALL_SCRIPT" << EOF
 # Check and install $app
 if ! flatpak list --app --columns=application | grep -q "^$app\$"; then
   echo "Installing $app..."
@@ -71,27 +94,25 @@ else
 fi
 
 EOF
-done
+    done <<< "$CURRENT_APPS"
 
-# Add completion message
-cat >> "$OUTPUT_PATH" << 'EOF'
+    # Add completion message
+    cat >> "$REINSTALL_SCRIPT" << 'EOF'
 echo "Flatpak applications reinstallation completed!"
 EOF
 
-# Check if the script content has changed or if it's a new file
-if [ ! -f "$OUTPUT_PATH.old" ] || [ "$(cat "$OUTPUT_PATH")" != "$OLD_CONTENT" ]; then
-    echo "Changes detected in Flatpak applications list. Adding to commit..."
+    # Commit the changes to both files
+    git add "$APP_LIST_FILE" "$REINSTALL_SCRIPT"
+    git commit -m "Automatic update of Flatpak applications list and reinstall script"
 
-    # Add the script to Git
-    git add "$OUTPUT_PATH"
-
-    # Commit the changes
-    git commit -m "Automatic update of Flatpak applications list"
-
-    echo "Flatpak reinstallation script has been updated and committed."
+    echo "Flatpak applications list and reinstall script have been updated and committed."
+else
+    echo "No changes needed for Flatpak applications list and reinstall script."
 fi
 
-echo "Flatpak reinstallation script ready at $OUTPUT_PATH"
+# Try to pull before pushing to avoid rejection
+echo "Attempting to pull latest changes to avoid push rejection..."
+git pull --rebase origin $(git symbolic-ref --short HEAD) || true
 
 # Exit successfully to allow the push to continue
 exit 0
