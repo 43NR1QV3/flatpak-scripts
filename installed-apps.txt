@@ -3,3 +3,4 @@ com.discordapp.Discord
 com.github.tchx84.Flatseal
 io.freetubeapp.FreeTube
 org.keepassxc.KeePassXC
+org.telegram.desktop

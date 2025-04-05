@@ -45,4 +45,12 @@ else
   echo "org.keepassxc.KeePassXC is already installed, skipping..."
 fi
 
+# Check and install org.telegram.desktop
+if ! flatpak list --app --columns=application | grep -q "^org.telegram.desktop$"; then
+  echo "Installing org.telegram.desktop..."
+  flatpak install flathub org.telegram.desktop -y
+else
+  echo "org.telegram.desktop is already installed, skipping..."
+fi
+
 echo "Flatpak applications reinstallation completed!"
