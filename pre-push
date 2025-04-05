@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Source directory for Flatpak override files
+SOURCE_DIR="${HOME}/.local/share/flatpak/overrides"
+
+# Destination directory in the repository root
+DEST_DIR="$(git rev-parse --show-toplevel)/flatpak-overrides"
+
+# Create destination directory if it doesn't exist
+mkdir -p "$DEST_DIR"
+
+# Copy all files from source directory to destination
+cp -r "$SOURCE_DIR"/* "$DEST_DIR"/ 2>/dev/null || true
+
+# Check if there are any changes
+if git status --porcelain "$DEST_DIR" | grep -q .; then
+    echo "Changes detected in Flatpak override files. Adding to commit..."
+    
+    # Add all changes to Git
+    git add "$DEST_DIR"
+    
+    # Commit the changes
+    git commit -m "Automatic update of Flatpak overrides"
+    
+    echo "Flatpak override changes have been added in a new commit."
+    
+    # No need to explicitly push, as the original push will continue after the hook
+fi
+
+# Exit successfully to allow the push to continue
+exit 0
