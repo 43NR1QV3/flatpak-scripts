@@ -40,7 +40,7 @@ When you need to reinstall your Flatpak applications (on a new system or after a
 
 2. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
+   git clone https://github.com/43NR1QV3/flatpak-scripts.git
    cd your-repo-name
    ```
 
