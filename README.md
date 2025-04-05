@@ -1,11 +1,11 @@
 # Flatpak Backup & Restore Tool
 
-This repository contains tools to backup and restore your Flatpak applications and their custom configurations.
+This repository contains tools to backup and restore your Flatpak applications and their custom configurations made using Flatseal.
 
 ## Features
 
 - 🔄 Automatic backup of Flatpak applications list
-- ⚙️ Automatic backup of Flatpak override configurations
+- ⚙️ Automatic backup of Flatpak override configurations created with Flatseal
 - 📦 Easy reinstallation of all your Flatpak applications
 - 🛠️ Simple restoration of your custom Flatpak configurations
 
@@ -23,6 +23,11 @@ This repository contains tools to backup and restore your Flatpak applications a
   sudo pacman -S flatpak
   ```
 
+- **Flatseal (recommended):** For managing Flatpak permissions
+  ```bash
+  flatpak install flathub com.github.tchx84.Flatseal
+  ```
+
 - **Git:** Git is required for the hooks and repository management
 
 ## How It Works
@@ -30,7 +35,7 @@ This repository contains tools to backup and restore your Flatpak applications a
 This tool uses Git pre-push hooks to automatically:
 
 1. Create a backup script of all your installed Flatpak applications
-2. Save your Flatpak override configurations
+2. Save your Flatpak override configurations made with Flatseal
 
 ## Reinstalling Your Flatpak Applications
 
@@ -41,17 +46,17 @@ When you need to reinstall your Flatpak applications (on a new system or after a
 2. Clone this repository:
    ```bash
    git clone https://github.com/43NR1QV3/flatpak-scripts.git
-   cd your-repo-name
+   cd flatpak-scripts
    ```
 
 3. Make the reinstallation script executable (if it's not already):
    ```bash
-   chmod +x reinstall-flatpaks.sh
+   chmod +x reinstall-apps.sh
    ```
 
 4. Run the reinstallation script:
    ```bash
-   ./reinstall-flatpaks.sh
+   ./reinstall-apps.sh
    ```
 
 The script will automatically:
@@ -69,7 +74,7 @@ cat > restore-overrides.sh << 'EOF'
 #!/bin/bash
 
 # Source directory in the repository
-SOURCE_DIR="$(pwd)/flatpak-overrides"
+SOURCE_DIR="$(pwd)/overrides"
 
 # Destination directory for Flatpak override files
 DEST_DIR="${HOME}/.local/share/flatpak/overrides"
@@ -98,14 +103,18 @@ You can also copy and paste the above commands directly into your terminal to cr
 For the best experience:
 
 1. Run the reinstallation script first to install all your Flatpak applications
-2. Then run the restore script to apply your custom configurations
-3. Restart any running Flatpak applications to apply the restored settings
+2. Install Flatseal if you plan to modify application permissions
+3. Run the restore script to apply your custom configurations 
+4. Restart any running Flatpak applications to apply the restored settings
 
 ## Notes
 
 - The override configurations contain your custom settings for Flatpak applications
-- These may include permissions, environment variables, and other application-specific settings
-- If you've made significant changes to your Flatpak setup, consider committing and pushing those changes before reinstalling
+- These include permissions, environment variables, and other application-specific settings managed in Flatseal
+- The repository contains two important files:
+  - `installed-apps.txt`: A simple list of all installed Flatpak applications
+  - `reinstall-apps.sh`: The script to reinstall all applications from Flathub
+- If you've made significant changes to your Flatpak setup, consider pushing those changes to update your backups
 
 ---
 
