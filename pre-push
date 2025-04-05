@@ -28,7 +28,7 @@ fi
 
 # Part 2: Create and update app list and reinstall script
 REPO_ROOT=$(git rev-parse --show-toplevel)
-APP_LIST_FILE="$REPO_ROOT/installed-flatpaks.txt"
+APP_LIST_FILE="$REPO_ROOT/installed-apps.txt"
 REINSTALL_SCRIPT="$REPO_ROOT/reinstall-apps.sh"
 
 # Get current list of installed Flatpak applications
