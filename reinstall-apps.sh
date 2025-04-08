@@ -5,6 +5,14 @@
 
 echo "Starting Flatpak applications reinstallation..."
 
+# Check and install com.brave.Browser
+if ! flatpak list --app --columns=application | grep -q "^com.brave.Browser$"; then
+  echo "Installing com.brave.Browser..."
+  flatpak install flathub com.brave.Browser -y
+else
+  echo "com.brave.Browser is already installed, skipping..."
+fi
+
 # Check and install com.dec05eba.gpu_screen_recorder
 if ! flatpak list --app --columns=application | grep -q "^com.dec05eba.gpu_screen_recorder$"; then
   echo "Installing com.dec05eba.gpu_screen_recorder..."
