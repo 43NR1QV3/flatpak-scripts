@@ -1,7 +1,9 @@
 com.brave.Browser
 com.dec05eba.gpu_screen_recorder
 com.discordapp.Discord
+com.github.marinm.songrec
 com.github.tchx84.Flatseal
 io.freetubeapp.FreeTube
+org.kde.kdenlive
 org.keepassxc.KeePassXC
 org.telegram.desktop

@@ -29,6 +29,14 @@ else
   echo "com.discordapp.Discord is already installed, skipping..."
 fi
 
+# Check and install com.github.marinm.songrec
+if ! flatpak list --app --columns=application | grep -q "^com.github.marinm.songrec$"; then
+  echo "Installing com.github.marinm.songrec..."
+  flatpak install flathub com.github.marinm.songrec -y
+else
+  echo "com.github.marinm.songrec is already installed, skipping..."
+fi
+
 # Check and install com.github.tchx84.Flatseal
 if ! flatpak list --app --columns=application | grep -q "^com.github.tchx84.Flatseal$"; then
   echo "Installing com.github.tchx84.Flatseal..."
@@ -43,6 +51,14 @@ if ! flatpak list --app --columns=application | grep -q "^io.freetubeapp.FreeTub
   flatpak install flathub io.freetubeapp.FreeTube -y
 else
   echo "io.freetubeapp.FreeTube is already installed, skipping..."
+fi
+
+# Check and install org.kde.kdenlive
+if ! flatpak list --app --columns=application | grep -q "^org.kde.kdenlive$"; then
+  echo "Installing org.kde.kdenlive..."
+  flatpak install flathub org.kde.kdenlive -y
+else
+  echo "org.kde.kdenlive is already installed, skipping..."
 fi
 
 # Check and install org.keepassxc.KeePassXC
